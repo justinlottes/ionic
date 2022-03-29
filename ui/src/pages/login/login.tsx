@@ -22,7 +22,7 @@ export const LoginPage: React.FunctionComponent<LoginProps> = () => {
                     <h1>
                         welcome to <span className='app-name'>the chat site</span>
                     </h1>
-                    <h2>Please login or <Link to='/sign-up'>sign up</Link></h2>
+                    <h2>Please login or <Link to='/signup'>sign up</Link></h2>
                     <label>
                         Username
                         <input type='text' value={username} onChange={(e) => setUsername(e.target.value.toLowerCase())} />
