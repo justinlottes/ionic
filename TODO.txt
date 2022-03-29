@@ -1,0 +1,12 @@
+create endpoints
+	/registration/register
+		POST - user/username
+	/auth/login
+		POST - username
+	/room
+		GET - return sorted list of rooms by last used, paginate
+		POST - name
+	/room/id/message
+		POST - user - message
+		GET - return last 50 messages
+
