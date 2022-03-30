@@ -109,12 +109,12 @@ def createRoom(name):
 	return id
 
 def getRooms(limit, offset):
-	names = None
+	rooms = None
 	sql = """
-		SELECT name 
-		FROM rooms 
+		SELECT id, name
+		FROM rooms as rooms1 
 		ORDER BY 
-			(SELECT MAX(createdAt) FROM messages LEFT JOIN rooms as rooms1 ON messages.roomId = rooms1.id WHERE rooms1.name = name) DESC;
+			(SELECT MAX(createdAt) FROM messages LEFT JOIN rooms as rooms2 ON messages.roomId = rooms2.id WHERE rooms1.id = rooms2.id) DESC;
 	"""
 
 
@@ -123,17 +123,17 @@ def getRooms(limit, offset):
 		cur = conn.cursor()
 
 		cur.execute(sql)
-		names = [item for item, in cur]
+		rooms = [{'id': id, 'name': name} for id, name in cur]
 
 		cur.close()
 	except (Exception, psycopg2.DatabaseError) as err:
 		print('getRoomsErr', err)
-		names = None
+		rooms = None
 	finally:
 		if conn is not None:
 			conn.close()
 
-	return names
+	return rooms
 
 def postMessage(room, username, message):
 	id = None
@@ -167,12 +167,11 @@ def postMessage(room, username, message):
 def getMessages(room):
 	messages = None
 	sql = """
-		SELECT users.username, messages.message, messages.createdAt 
-		FROM messages 
-			LEFT JOIN users ON messages.userId = users.id
-			LEFT JOIN rooms ON messages.roomId = rooms.id
-		WHERE rooms.name=%s
-		ORDER BY createdAt DESC;
+		SELECT id, userId, message, createdAt
+		FROM messages
+		WHERE roomId = (SELECT id FROM rooms WHERE name = %s)
+		ORDER BY createdAt DESC
+		LIMIT 50
 	"""
 
 	try:
@@ -180,7 +179,7 @@ def getMessages(room):
 		cur = conn.cursor()
 
 		cur.execute(sql, (room,))
-		messages = [{'username': username, 'message': message, 'createdAt': createdAt} for username, message, createdAt in cur]
+		messages = [{'id': id, 'userId': userId, 'message': message, 'createdAt': createdAt} for id, userId, message, createdAt in cur]
 
 		cur.close()
 	except (Exception, psycopg2.DatabaseError) as err:
@@ -191,6 +190,62 @@ def getMessages(room):
 			conn.close()
 
 	return messages
+
+def getLatestMessages():
+  messages = None
+  sql = """
+    SELECT m.id, m.userId, m.roomId, m.message, m.createdAt
+    FROM (SELECT r.*, DENSE_RANK() OVER
+      (PARTITION BY r.roomId ORDER BY r.createdAt DESC) as pos
+      FROM messages as r) as m
+    WHERE m.pos = 1
+  """
+
+  try:
+    conn = createConnection()
+    cur = conn.cursor()
+
+    cur.execute(sql)
+    messages = [{'id': id, 'userId': userId, 'roomId': roomId, 'message': message, 'createdAt': createdAt} 
+        for id, userId, roomId, message, createdAt in cur]
+
+    cur.close()
+  except (Exception, psycopg2.DatabaseError) as err:
+    print('getMessagesErr', err)
+    messages = None
+  finally:
+    if conn is not None:
+      conn.close()
+
+  return messages
+
+
+def getUsers(userIds):
+	users = None
+	sql = """
+		SELECT id, username, name 
+		FROM users 
+		WHERE id IN (%s)
+	"""
+
+	try:
+		conn = createConnection()
+		cur = conn.cursor()
+
+		print('userIds', userIds, 'test')
+
+		cur.execute(sql, (userIds,))
+		users = [{'id': id, 'username': username, 'name': name} for id, username, name in cur]
+
+		cur.close()
+	except (Exception, psycopg2.DatabaseError) as err:
+		print('getMessagesErr', err)
+		users = None
+	finally:
+		if conn is not None:
+			conn.close()
+
+	return users
 
 
 

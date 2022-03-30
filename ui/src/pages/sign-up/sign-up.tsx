@@ -1,6 +1,8 @@
 import './sign-up.scss';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { APIService } from '../../services';
+import { useNavigate } from 'react-router-dom';
 
 interface SignUpProps {
 }
@@ -8,14 +10,25 @@ interface SignUpProps {
 export const SignUpPage: React.FunctionComponent<SignUpProps> = () => {
     
     // need to be able to create user
-    const creatingUser = false;
+    let creatingUser = false;
     const [username, setUsername] = useState('');
     const [name, setName] = useState('');
+		const navigate = useNavigate();
 
-    const signUp = () => {
+    const signUp = async () => {
         if (creatingUser) {
             return;
         }
+
+				try {
+					creatingUser = true;
+
+					await APIService.createUser({name, username});
+
+					navigate('/login');
+				} catch (ex: any) {
+					creatingUser = false;
+				}
     };
 
     return (

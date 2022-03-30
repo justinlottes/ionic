@@ -1,19 +1,21 @@
 // feel free to change all schemas
 
 export interface User {
-    id: string;
-    name: string
+    id: number;
+    name: string;
+		username: string;
 }
 
 export interface Message {
-    id: string;
+    id: number;
+		roomId: number;
     sentBy: User;
     sentAt: Date;
     content: string;
 }
 
 export interface Chatroom {
-    id: string;
+    id: number
     mostRecentMessage: Message;
     name: string;
 }

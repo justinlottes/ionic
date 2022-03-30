@@ -4,9 +4,34 @@ create endpoints
 	/auth/login
 		POST - username
 	/room
-		GET - return sorted list of rooms by last used, paginate
 		POST - name
+		GET - return sorted list of rooms by last used, paginate
 	/room/id/message
 		POST - user - message
 		GET - return last 50 messages
 
+
+Input Validation
+ORM
+Pagination - rooms, messages
+Transactions
+
+
+username/name max length = 50
+room name max length = 50
+message max length = 50
+
+No magic string values
+	navigation should use Consts imported from somewhere
+
+Cleanup persistence.py, use helper method for gets
+
+Escape userIds in API call
+
+Persist Users/Messages somewhere
+
+Have adapters that Map API Call format to FE format
+
+Endpoint authorization
+
+Fix empty users on API

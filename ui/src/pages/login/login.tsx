@@ -1,18 +1,31 @@
 import './login.scss';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { APIService } from '../../services';
+import { useNavigate } from 'react-router-dom';
 
 export interface LoginProps { }
 
 export const LoginPage: React.FunctionComponent<LoginProps> = () => {
-    const loggingIn = false;
+    let loggingIn = false;
     const [username, setUsername] = useState('');
+		const navigate = useNavigate();
 
     // need to be able to login
-    const login = () => {
+    const login = async () => {
         if (loggingIn) {
             return;
         }
+
+				try {
+					loggingIn = true;
+
+					await APIService.login(username);
+
+					navigate('/chat');
+				} catch(ex: any) {
+					loggingIn = false;
+				}
     }
 
     return (

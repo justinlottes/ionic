@@ -1,33 +1,51 @@
 import './chat.scss';
 import { Link, NavLink, Route, RouteProps, Routes } from 'react-router-dom';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { stringToColor } from '../../utils';
 import { Chatroom, ChatroomCard, NewChatroom } from '../../components';
 import { models } from '../../models';
+import { APIService } from '../../services';
+import { useNavigate } from 'react-router-dom';
 
 export interface ChatProps { }
 
 export const ChatPage: React.FunctionComponent<ChatProps> = () => {
 
-    // need to load user
-    const currentUser: models.User = {
-        id: '1',
-        name: 'Test User',
-    };
+		const navigate = useNavigate();
+		const [currentUser, setCurrentUser] = useState(undefined as (models.User | undefined));
+    const [chatrooms, setChatrooms] = useState([] as models.Chatroom[]);
 
-    // need to load chatrooms
-    const chatrooms: models.Chatroom[] = [{
-        id: '1',
-        name: 'Test Chatroom',
-        mostRecentMessage: {
-            id: '1',
-            sentBy: currentUser,
-            content: 'Lorem Ipsum',
-            sentAt: new Date(Date.now()),
-        }
-    }];
+		const getCurrentUser = async() => {
+			return APIService.getCurrentUser().then(user => {
+				if(user) {
+					setCurrentUser(user)
+				} else {
+					navigate('/login');
+				}
+			});
+		};
 
-    const logout = () => {
+		const getChatrooms = async() => {
+			return APIService.getRooms(true).then(rooms => {
+				console.log(JSON.stringify(rooms));
+				setChatrooms(rooms);
+			}).catch(() => {
+				console.log('not logged in?');
+			});
+		}
+
+		useEffect(() => {
+			if(!currentUser) {
+				getCurrentUser()
+					.then(getChatrooms);
+			} else {
+				getChatrooms();
+			}
+		}, []);
+
+    const logout = async () => {
+				await APIService.logout()
+				navigate('/login');
         return;
     };
 

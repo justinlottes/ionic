@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { ChatBubble } from '../chat-bubble/chat-bubble';
 import { models } from '../../models';
 import { useParams } from 'react-router-dom';
+import { APIService } from '../../services';
 
 export interface ChatroomProps { }
 
@@ -11,12 +12,29 @@ type RouteParams = {
 }
 
 export const Chatroom: React.FunctionComponent<ChatroomProps> = () => {
+
     const [message, setMessage] = useState('');
-    const messages: models.Message[] = [];
-    const sendingMessage = false;
-    const loadingMessages = false;
+    const [messages, setMessages] = useState([] as models.Message[]);
+    const [currentUser, setCurrentUser] = useState(undefined as models.User | undefined);
     const { id } = useParams<RouteParams>();
-    const currentUser: models.User | undefined = { id: '1', name: 'Test User' };
+
+    let sendingMessage = false;
+    let loadingMessages = false;
+
+		//TODO - copy pasta
+		const getCurrentUser = async() => {
+			return APIService.getCurrentUser().then(user => {
+				if(user) {
+					setCurrentUser(user)
+				}
+			});
+		};
+
+		const getMessages = async() => {
+			return APIService.getMessages(id as string).then((messages) => {
+				setMessages(messages);
+			});
+		};
 
     const sendMessage = () => {
         if (sendingMessage) {
