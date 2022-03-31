@@ -25,7 +25,10 @@ def initPersistance():
 		sqlCommands = sqlFile.split(';')
 
 		for command in sqlCommands:
-			cur.execute(command)
+			command = command.replace('\r', ' ').replace('\n', ' ').strip()
+			if command != '':
+				print('cmd "', command, '"')
+				cur.execute(command)
 
 		conn.commit()
 		cur.close()
