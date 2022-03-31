@@ -94,24 +94,24 @@ def getUsersEP():
       users = users
     ), 200
 
-@app.route('/room/<roomName>/message', methods=['POST'])
-def createMessageEP(roomName):
-  username = request.headers.get('FakeAuthorization')
+@app.route('/room/<roomId>/message', methods=['POST'])
+def createMessageEP(roomId):
+  username = request.headers.get('Fake-Authorization')
+  print(request.headers)
   data = request.get_json()
 
-  id = postMessage(roomName, username, data.get('message'))
+  id = postMessage(roomId, username, data.get('message'))
   if id is None:
     return jsonify(
-      err = 'createRoom_failed'
+      err = 'createMessage_failed'
     ), 400
   else:
     return jsonify(
       id = id
   ), 200
 
-
-@app.route('/room/<roomName>/message', methods=['GET'])
-def getMessagesEP(roomName):
+@app.route('/room/<roomId>/message', methods=['GET'])
+def getMessagesEP(roomId):
   return jsonify(
-    getMessages(roomName)
+    messages = getMessages(roomId)
   ), 200

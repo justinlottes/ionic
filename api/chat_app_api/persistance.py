@@ -135,22 +135,23 @@ def getRooms(limit, offset):
 
 	return rooms
 
-def postMessage(room, username, message):
+def postMessage(roomId, username, message):
 	id = None
 	sql = """
 		INSERT INTO messages(roomId, userId, message)
 			VALUES(
-				(SELECT id from rooms WHERE name=%s),
+				%s,
 				(SELECT id from users WHERE username=%s),
 				%s)
 		RETURNING id;
 	"""
 
+
 	try:
 		conn = createConnection()
 		cur = conn.cursor()
 
-		cur.execute(sql, (room, username, message,))
+		cur.execute(sql, (roomId, username, message,))
 		id = cur.fetchone()[0]
 
 		conn.commit()
@@ -164,12 +165,12 @@ def postMessage(room, username, message):
 
 	return id
 
-def getMessages(room):
+def getMessages(roomId):
 	messages = None
 	sql = """
 		SELECT id, userId, message, createdAt
 		FROM messages
-		WHERE roomId = (SELECT id FROM rooms WHERE name = %s)
+		WHERE roomId = %s
 		ORDER BY createdAt DESC
 		LIMIT 50
 	"""
@@ -178,7 +179,7 @@ def getMessages(room):
 		conn = createConnection()
 		cur = conn.cursor()
 
-		cur.execute(sql, (room,))
+		cur.execute(sql, (roomId,))
 		messages = [{'id': id, 'userId': userId, 'message': message, 'createdAt': createdAt} for id, userId, message, createdAt in cur]
 
 		cur.close()

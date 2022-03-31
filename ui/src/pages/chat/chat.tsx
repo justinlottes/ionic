@@ -35,13 +35,14 @@ export const ChatPage: React.FunctionComponent<ChatProps> = () => {
 		}
 
 		useEffect(() => {
-			if(!currentUser) {
-				getCurrentUser()
-					.then(getChatrooms);
-			} else {
+			getCurrentUser();
+		}, []);
+		
+		useEffect(() => {
+			if(currentUser) {
 				getChatrooms();
 			}
-		}, []);
+		}, [currentUser]);
 
     const logout = async () => {
 				await APIService.logout()

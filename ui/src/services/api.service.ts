@@ -87,13 +87,13 @@ export class APIService {
 			return Promise.resolve();
 		}
 
-		static async createRoom(room: string): Promise<void> {
+		static async createRoom(room: string): Promise<number> {
 			if(!APIService.credentials) {
 				return Promise.reject();//TODO - navigate to login
 			}
 
 			try {
-				await APIService.do(`${API_URL}/room`, {
+				const result = await APIService.do(`${API_URL}/room`, {
 					method: 'POST',
 					headers: [
 						['Content-Type', 'application/json'],
@@ -103,6 +103,8 @@ export class APIService {
 						name: room,
 					})
 				});
+
+				return result.id;
 			} catch(ex: any) {
 				console.log('createRoomErr', ex);
 				return Promise.reject();
@@ -188,13 +190,13 @@ export class APIService {
 			}
 		}
 
-		static async createMessage(room: string, message: string): Promise<void> {
+		static async createMessage(roomId: number, message: string): Promise<void> {
 			if(!APIService.credentials) {
 				return Promise.reject();//TODO - navigate to login
 			}
 
 			try {
-				await APIService.do(`${API_URL}/room/${room}`, {
+				await APIService.do(`${API_URL}/room/${roomId}/message`, {
 					method: 'POST',
 					headers: [
 						['Content-Type', 'application/json'],
@@ -210,18 +212,18 @@ export class APIService {
 			}
 		}
 
-		static async getMessages(room: string): Promise<models.Message[]> {
+		static async getMessages(room: number): Promise<models.Message[]> {
 			if(!APIService.credentials) {
 				return Promise.reject();
 			}
 
 			try {
-				return await APIService.do(`${API_URL}/room/${room}`, {
+				return APIService.buildMessages((await APIService.do(`${API_URL}/room/${room}/message`, {
 					method: 'GET',
 					headers: [
 						['Fake-Authorization', APIService.credentials.username]
 					],
-				});
+				})).messages);
 			} catch(ex: any) {
 				console.log('createMessageErr', ex);
 				return Promise.reject();

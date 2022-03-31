@@ -31,20 +31,34 @@ export const Chatroom: React.FunctionComponent<ChatroomProps> = () => {
 		};
 
 		const getMessages = async() => {
-			return APIService.getMessages(id as string).then((messages) => {
+			console.log('id param', id);
+			return APIService.getMessages(parseInt(id as string)).then((messages) => {
+				console.log(messages);
 				setMessages(messages);
+			}).catch((err: any) => {
+				console.log('fetch err: ', err);
 			});
 		};
 
-    const sendMessage = () => {
+    const sendMessage = async () => {
         if (sendingMessage) {
             return;
         }
+
+				sendingMessage = true;
+
+				return APIService.createMessage(parseInt(id as string), message).then(getMessages);
     };
 
+		useEffect(() => {
+			getCurrentUser();
+		}, [id]);
+
     useEffect(() => {
-        // load or reload recent messages with chatroom id
-    }, []);
+				if(currentUser) {
+					getMessages();
+				}
+    }, [id, currentUser]);
 
     return (
         <section className='chat'>

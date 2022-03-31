@@ -1,18 +1,31 @@
 import React, { useState } from 'react';
 import './new-chatroom.scss';
+import { useNavigate } from 'react-router-dom';
+import { APIService } from '../../services/api.service';
 
 export interface NewChatroomProps {
 }
 
 export const NewChatroom: React.FunctionComponent<NewChatroomProps> = () => {
     const [name, setName] = useState('');
-    const creatingRoom = false;
+    let creatingRoom = false;
+		const navigate = useNavigate();
 
     // need to be able to create room
-    const create = () => {
+    const create = async () => {
         if (creatingRoom) {
             return;
         }
+
+				creatingRoom = true;
+
+				APIService.createRoom(name).then((id: number) => {
+					navigate(`/chat/${id}`);
+				}).catch((err: any) => {
+					console.error('creatRoomErr', err);
+				}).finally(() => {
+					creatingRoom = false;
+				});
     };
 
     return (
