@@ -45,7 +45,7 @@ def createUser(name, username):
 		conn = createConnection()
 		cur = conn.cursor()
 
-		cur.execute(sql, (name, username))
+		cur.execute(sql, (name, username, ))
 		id = cur.fetchone()[0]
 		
 		conn.commit()
@@ -64,8 +64,7 @@ def getUser(username):
 	name = None
 	conn = None
 
-	#sql = """SELECT id, name FROM users WHERE username=%s"""
-	sql = """SELECT id, name FROM users"""
+	sql = """SELECT id, name FROM users WHERE username=%s"""
 	
 	try:
 		conn = createConnection()
@@ -226,16 +225,16 @@ def getUsers(userIds):
 	sql = """
 		SELECT id, username, name 
 		FROM users 
-		WHERE id IN (%s)
+		WHERE id IN %s
 	"""
 
 	try:
 		conn = createConnection()
 		cur = conn.cursor()
 
-		print('userIds', userIds, 'test')
+		print('userIds', tuple(userIds), 'test')
 
-		cur.execute(sql, (userIds,))
+		cur.execute(sql, (tuple(userIds), ))
 		users = [{'id': id, 'username': username, 'name': name} for id, username, name in cur]
 
 		cur.close()

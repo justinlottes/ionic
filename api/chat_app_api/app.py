@@ -83,7 +83,7 @@ def getUsersEP():
   userIds = request.args.get('userIds')
   users = []
   if userIds is not None:
-    users = getUsers(userIds)
+    users = getUsers(userIds.split(','))
 
   if(users is None):
     return jsonify(
